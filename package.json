@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon --exec babel-node src/index.js ",
-    "start": "./node_modules/.bin/babel-node src --out-dir build && node build/index.js"
+    "start": "babel-node src --out-dir build && node build/index.js"
   },
   "keywords": [],
   "author": "",
