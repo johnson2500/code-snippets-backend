@@ -66,3 +66,5 @@ node_modules/
 .env
 
 /firebase/config.json
+
+package-lock.json
