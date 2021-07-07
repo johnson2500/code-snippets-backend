@@ -3,25 +3,23 @@ import { isAuthorizedFor, getDataFromSnapshot } from '../helpers/index';
 export default (app, admin) => {
   app.post('/snippet', async (req, res) => {
     const {
-      userId, language, code, title,
+      userId, language, code, title, description,
     } = req.body;
 
-    if (!userId || !language || !code) {
-      res.status(400).send('uuid, language and code are required!');
-      return;
-    }
     try {
       console.log(`Writing to snippets ${req.body}`);
 
       const db = admin.firestore();
 
-      await db.collection('snippets').doc().set({
+      const doc = await db.collection('snippets').add({
         userId,
         language,
         code,
         title,
+        description,
       });
-      res.send('Sucess');
+
+      res.send(doc.id);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -89,5 +87,39 @@ export default (app, admin) => {
         console.error('Error removing document: ', error);
         res.status(500).send(error);
       });
+  });
+
+  app.put('/snippet', async (req, res) => {
+    const {
+      userId, token, id, language, code, description, title,
+    } = req.body;
+
+    const isAuthed = await isAuthorizedFor(admin, token, userId);
+
+    if (!isAuthed) {
+      res.status(401).send('Not Authorized for uuid');
+      return;
+    }
+
+    // delete document
+
+    try {
+      console.log(`Updating doc ${id}`);
+
+      const db = admin.firestore();
+
+      await db.collection('snippets').doc().set({
+        userId,
+        language,
+        code,
+        title,
+        description,
+      });
+
+      res.send(id);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
+    }
   });
 };
