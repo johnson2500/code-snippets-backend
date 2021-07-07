@@ -108,7 +108,7 @@ export default (app, admin) => {
 
       const db = admin.firestore();
 
-      await db.collection('snippets').doc().set({
+      await db.collection('snippets').doc(id).set({
         userId,
         language,
         code,
