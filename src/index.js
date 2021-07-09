@@ -17,6 +17,11 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+app.get('/test', (req, res) => {
+  console.log(req.headers.authorization);
+  res.send('Hello World!');
+});
+
 snippetRoutes(app, admin);
 
 app.listen(port, () => {

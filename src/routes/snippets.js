@@ -1,23 +1,34 @@
-import { isAuthorizedFor, getDataFromSnapshot } from '../helpers/index';
+import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
 
 export default (app, admin) => {
+  const db = admin.firestore();
+
+  const snippetsRef = db.collection('snippets');
+
   app.post('/snippet', async (req, res) => {
-    const {
-      userId, language, code, title, description,
-    } = req.body;
-
     try {
-      console.log(`Writing to snippets ${req.body}`);
+      console.log('Writing to snippets');
 
-      const db = admin.firestore();
+      const {
+        language, code, title, description,
+      } = req.body;
 
-      const doc = await db.collection('snippets').add({
+      const { authorization: token } = req.headers;
+
+      const userId = await getUserId(admin, token);
+
+      console.log('/snippets userId ', userId);
+
+      const doc = await snippetsRef.add({
         userId,
         language,
         code,
         title,
         description,
       });
+
+      console.log('/snippets created snippets', doc.id);
+      console.log(doc);
 
       res.send(doc.id);
     } catch (error) {
@@ -27,88 +38,85 @@ export default (app, admin) => {
   });
 
   app.get('/snippet', async (req, res) => {
-    const { userId, token } = req.query;
+    try {
+      const { authorization: token } = req.headers;
 
-    const isAuthed = await isAuthorizedFor(admin, token, userId);
+      const userId = await getUserId(admin, token);
 
-    if (!isAuthed) {
-      res.code(401).send('Not Authorized for uuid');
+      // Create a query against the collection
+      const queryRef = await snippetsRef.where('userId', '==', userId).get();
+
+      res.send(queryRef);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
     }
-
-    const db = admin.firestore();
-
-    // Create a reference to the cities collection
-    const snippetsRef = db.collection('snippets');
-
-    // Create a query against the collection
-    const queryRef = await snippetsRef.where('userId', '==', userId).get();
-
-    res.send(queryRef);
   });
 
   app.get('/snippets', async (req, res) => {
-    const { userId, token } = req.query;
+    try {
+      console.log('Request: /snippets');
+      const { authorization: token } = req.headers;
 
-    const isAuthed = await isAuthorizedFor(admin, token, userId);
+      const userId = await getUserId(admin, token);
 
-    if (!isAuthed) {
-      res.status(401).send('Not Authorized for uuid');
-      return;
+      // Create a query against the collection
+      const queryRef = await snippetsRef.where('userId', '==', userId).get();
+
+      const data = getDataFromSnapshot(queryRef);
+
+      res.send(data);
+    } catch (err) {
+      console.log(`Error: /snippets : ${err.message}`);
+      res.status(500).send(err.message);
     }
-
-    const db = admin.firestore();
-
-    // Create a reference to the cities collection
-    const snippetsRef = db.collection('snippets');
-
-    // Create a query against the collection
-    const queryRef = await snippetsRef.where('userId', '==', userId).get();
-
-    res.send(getDataFromSnapshot(queryRef));
   });
 
-  app.delete('/snippet', async (req, res) => {
-    const { userId, token, id } = req.query;
+  app.delete('/snippet/:docId', async (req, res) => {
+    try {
+      const { docId } = req.params;
 
-    const isAuthed = await isAuthorizedFor(admin, token, userId);
+      console.log('Attempting to delete doc ', docId);
 
-    if (!isAuthed) {
-      res.status(401).send('Not Authorized for uuid');
-      return;
+      const { authorization: token } = req.headers;
+
+      const userId = await getUserId(admin, token);
+
+      const document = await snippetsRef.doc(docId).get();
+
+      const { userId: documentUserId } = document.data();
+
+      if (documentUserId !== userId) {
+        res.status(401).sent('Not Authorized to delete');
+        return;
+      }
+
+      await db.collection('snippets').doc(docId).delete();
+
+      res.send(docId);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error);
     }
-
-    const db = admin.firestore();
-    // delete document
-    db.collection('snippets').doc(id).delete().then(() => {
-      console.log('Document successfully deleted!');
-      res.send(`Deleted ${id}`);
-    })
-      .catch((error) => {
-        console.error('Error removing document: ', error);
-        res.status(500).send(error);
-      });
   });
 
   app.put('/snippet', async (req, res) => {
-    const {
-      userId, token, id, language, code, description, title,
-    } = req.body;
-
-    const isAuthed = await isAuthorizedFor(admin, token, userId);
-
-    if (!isAuthed) {
-      res.status(401).send('Not Authorized for uuid');
-      return;
-    }
-
-    // delete document
-
     try {
-      console.log(`Updating doc ${id}`);
+      const { authorization: token } = req.headers;
+      const {
+        id, language, code, description, title,
+      } = req.body;
 
-      const db = admin.firestore();
+      const userId = await getUserId(admin, token);
 
-      await db.collection('snippets').doc(id).set({
+      const isAuthed = await isAuthorizedFor(admin, token, userId);
+
+      if (!isAuthed) {
+        res.status(401).send('Not Authorized for uuid');
+        return;
+      }
+
+      await snippetsRef.doc(id).set({
         userId,
         language,
         code,
