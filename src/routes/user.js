@@ -1,27 +1,25 @@
-import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
+import { isAuthorizedFor, getUserId } from '../helpers/index';
 
 export default (app, admin) => {
   const db = admin.firestore();
 
-  const snippetsRef = db.collection('snippets');
+  const usersRef = db.collection('users');
 
-  app.post('/snippet', async (req, res) => {
+  app.post('/user', async (req, res) => {
     try {
-      console.log('Writing to snippets');
+      console.log('Writing to users');
 
       const {
         language, code, title, description,
       } = req.body;
 
-      console.log(req.body);
-
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
-      console.log('/snippets userId ', userId);
+      console.log('/users userId ', userId);
 
-      const doc = await snippetsRef.add({
+      const doc = await usersRef.add({
         userId,
         language,
         code,
@@ -29,7 +27,7 @@ export default (app, admin) => {
         description,
       });
 
-      console.log('/snippets created snippets', doc.id);
+      console.log('/users created users', doc.id);
       console.log(doc);
 
       res.send(doc.id);
@@ -39,14 +37,14 @@ export default (app, admin) => {
     }
   });
 
-  app.get('/snippet', async (req, res) => {
+  app.get('/user', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const queryRef = await snippetsRef.where('userId', '==', userId).get();
+      const queryRef = await usersRef.where('userId', '==', userId).get();
 
       res.send(queryRef);
     } catch (error) {
@@ -55,26 +53,7 @@ export default (app, admin) => {
     }
   });
 
-  app.get('/snippets', async (req, res) => {
-    try {
-      console.log('Request: /snippets');
-      const { authorization: token } = req.headers;
-
-      const userId = await getUserId(admin, token);
-
-      // Create a query against the collection
-      const queryRef = await snippetsRef.where('userId', '==', userId).get();
-
-      const data = getDataFromSnapshot(queryRef);
-
-      res.send(data);
-    } catch (err) {
-      console.log(`Error: /snippets : ${err.message}`);
-      res.status(500).send(err.message);
-    }
-  });
-
-  app.delete('/snippet/:docId', async (req, res) => {
+  app.delete('/user/:docId', async (req, res) => {
     try {
       const { docId } = req.params;
 
@@ -84,7 +63,7 @@ export default (app, admin) => {
 
       const userId = await getUserId(admin, token);
 
-      const document = await snippetsRef.doc(docId).get();
+      const document = await usersRef.doc(docId).get();
 
       const { userId: documentUserId } = document.data();
 
@@ -93,7 +72,7 @@ export default (app, admin) => {
         return;
       }
 
-      await db.collection('snippets').doc(docId).delete();
+      await db.collection('users').doc(docId).delete();
 
       res.send(docId);
     } catch (error) {
@@ -102,7 +81,7 @@ export default (app, admin) => {
     }
   });
 
-  app.put('/snippet', async (req, res) => {
+  app.put('/user', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
       const {
@@ -118,7 +97,7 @@ export default (app, admin) => {
         return;
       }
 
-      await snippetsRef.doc(id).set({
+      await usersRef.doc(id).set({
         userId,
         language,
         code,
