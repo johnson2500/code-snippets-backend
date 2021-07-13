@@ -45,7 +45,7 @@ export default (app, admin) => {
       console.log('Writing to notes');
 
       const {
-        note, title, description,
+        text, title, description,
       } = req.body;
 
       const { authorization: token } = req.headers;
@@ -56,9 +56,37 @@ export default (app, admin) => {
 
       const doc = await notesRef.add({
         userId,
-        note,
+        text,
         title,
         description,
+      });
+
+      console.log('/notes created notes', doc.id);
+      console.log(doc);
+
+      res.send(doc.id);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.post('/note/pin', async (req, res) => {
+    try {
+      console.log('Writing to notes');
+
+      const {
+        pinned, id,
+      } = req.body;
+
+      const { authorization: token } = req.headers;
+
+      const userId = await getUserId(admin, token);
+
+      console.log('/note updating pinned variable ', userId);
+
+      const doc = await notesRef.doc(id).update({
+        pinned,
       });
 
       console.log('/notes created notes', doc.id);
@@ -75,7 +103,7 @@ export default (app, admin) => {
     try {
       const { authorization: token } = req.headers;
       const {
-        id, language, code, description, title,
+        id, text, description, title,
       } = req.body;
 
       const userId = await getUserId(admin, token);
@@ -89,8 +117,7 @@ export default (app, admin) => {
 
       await notesRef.doc(id).set({
         userId,
-        language,
-        code,
+        text,
         title,
         description,
       });

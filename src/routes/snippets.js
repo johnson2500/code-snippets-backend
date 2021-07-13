@@ -39,6 +39,34 @@ export default (app, admin) => {
     }
   });
 
+  app.post('/snippet/pin', async (req, res) => {
+    try {
+      console.log('Writing to notes');
+
+      const {
+        pinned, id,
+      } = req.body;
+
+      const { authorization: token } = req.headers;
+
+      const userId = await getUserId(admin, token);
+
+      console.log('/pins userId ', userId);
+
+      const doc = await snippetsRef.doc(id).update({
+        pinned,
+      });
+
+      console.log('/pins changed', doc.id);
+      console.log(doc);
+
+      res.send(doc.id);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
+    }
+  });
+
   app.get('/snippet', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
