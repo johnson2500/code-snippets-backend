@@ -1,36 +1,40 @@
+import { v4 as uuidv4 } from 'uuid';
 import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
 
 export default (app, admin) => {
   const db = admin.firestore();
 
-  const snippetsRef = db.collection('snippets');
+  const todoRef = db.collection('todo');
 
-  app.post('/snippet', async (req, res) => {
+  app.post('/todo', async (req, res) => {
     try {
-      console.log('Writing to snippets');
+      console.log('Writing to todo');
 
       const {
-        language, code, title, description,
+        todo,
       } = req.body;
-
-      console.log(req.body);
 
       const { authorization: token } = req.headers;
 
+      console.log(token);
+
       const userId = await getUserId(admin, token);
 
-      console.log('/snippets userId ', userId);
+      console.log('/todos userId ', userId);
 
-      const doc = await snippetsRef.add({
+      const uniqueId = uuidv4();
+
+      const doc = await todoRef.add({
         userId,
-        language,
-        code,
-        title,
-        description,
+        _id: uniqueId,
+        checked: false,
+        todo,
+        createdAt: new Date(),
+        updateAt: null,
+        archived: false,
       });
 
-      console.log('/snippets created snippets', doc.id);
-      console.log(doc);
+      console.log('/todos created todo', doc.id);
 
       res.send(doc.id);
     } catch (error) {
@@ -39,14 +43,14 @@ export default (app, admin) => {
     }
   });
 
-  app.get('/snippet', async (req, res) => {
+  app.get('/todo', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const queryRef = await snippetsRef.where('userId', '==', userId).get();
+      const queryRef = await todoRef.where('userId', '==', userId).get();
 
       res.send(queryRef);
     } catch (error) {
@@ -55,26 +59,27 @@ export default (app, admin) => {
     }
   });
 
-  app.get('/snippets', async (req, res) => {
+  app.get('/todos', async (req, res) => {
     try {
-      console.log('Request: /snippets');
+      console.log('Request: /todos');
+
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const queryRef = await snippetsRef.where('userId', '==', userId).get();
+      const queryRef = await todoRef.where('userId', '==', userId).get();
 
       const data = getDataFromSnapshot(queryRef);
 
       res.send(data);
     } catch (err) {
-      console.log(`Error: /snippets : ${err.message}`);
+      console.log(`Error: /todos : ${err.message}`);
       res.status(500).send(err.message);
     }
   });
 
-  app.delete('/snippet/:docId', async (req, res) => {
+  app.delete('/todo/:docId', async (req, res) => {
     try {
       const { docId } = req.params;
 
@@ -84,7 +89,7 @@ export default (app, admin) => {
 
       const userId = await getUserId(admin, token);
 
-      const document = await snippetsRef.doc(docId).get();
+      const document = await todoRef.doc(docId).get();
 
       const { userId: documentUserId } = document.data();
 
@@ -93,7 +98,7 @@ export default (app, admin) => {
         return;
       }
 
-      await db.collection('snippets').doc(docId).delete();
+      await db.collection('todo').doc(docId).delete();
 
       res.send(docId);
     } catch (error) {
@@ -102,7 +107,7 @@ export default (app, admin) => {
     }
   });
 
-  app.put('/snippet', async (req, res) => {
+  app.put('/todo', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
       const {
@@ -118,7 +123,7 @@ export default (app, admin) => {
         return;
       }
 
-      await snippetsRef.doc(id).set({
+      await todoRef.doc(id).set({
         userId,
         language,
         code,

@@ -83,9 +83,9 @@ export default (app, admin) => {
 
       const userId = await getUserId(admin, token);
 
-      console.log('/note updating pinned variable ', userId);
+      console.log('/note userId ', userId);
 
-      const doc = await notesRef.doc(id).update({
+      const doc = await notesRef.doc(id).set({
         pinned,
       });
 

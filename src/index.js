@@ -5,6 +5,7 @@ import cors from 'cors';
 import admin from './firebase/index';
 import snippetRoutes from './routes/snippets';
 import noteRoutes from './routes/notes';
+import todoRoutes from './routes/todos';
 
 const app = express();
 
@@ -25,6 +26,8 @@ app.get('/test', (req, res) => {
 
 snippetRoutes(app, admin);
 noteRoutes(app, admin);
+noteRoutes(app, admin);
+todoRoutes(app, admin);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
