@@ -8,8 +8,6 @@ export async function getUserId(admin, token) {
       .auth()
       .verifyIdToken(token);
 
-    console.log(token);
-
     return decodedToken.uid;
   } catch (error) {
     console.log(error);
