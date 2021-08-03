@@ -27,7 +27,6 @@ app.get('/test', (req, res) => {
 
 snippetRoutes(app, admin);
 noteRoutes(app, admin);
-noteRoutes(app, admin);
 todoRoutes(app, admin);
 scratchPadRoutes(app, admin);
 

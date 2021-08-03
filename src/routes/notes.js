@@ -45,7 +45,7 @@ export default (app, admin) => {
       console.log('Writing to notes');
 
       const {
-        text, title, description,
+        text, title, description, pinned,
       } = req.body;
 
       const { authorization: token } = req.headers;
@@ -59,6 +59,7 @@ export default (app, admin) => {
         text,
         title,
         description,
+        pinned: pinned || false,
       });
 
       console.log('/notes created notes', doc.id);
@@ -84,8 +85,9 @@ export default (app, admin) => {
       const userId = await getUserId(admin, token);
 
       console.log('/note userId ', userId);
+      console.log('id ', id);
 
-      const doc = await notesRef.doc(id).set({
+      const doc = await notesRef.doc(id).update({
         pinned,
       });
 
