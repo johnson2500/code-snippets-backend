@@ -1,20 +1,70 @@
-import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
+import { isAuthorizedFor, getUserId } from '../helpers/index';
+import { SNIPPET_TYPES, SNIPPET_TABLE_NAME, getUpdateSnippetQuery } from '../helpers/snippetHelpers';
 
-export default (app, admin) => {
-  const db = admin.firestore();
-
-  const notesRef = db.collection('notes');
-
-  app.get('/note', async (req, res) => {
+export default (app, admin, pg) => {
+  app.post('/note', async (req, res) => {
     try {
+      console.log('Writing to notes');
+
+      const {
+        content, title, pinned,
+      } = req.body;
+
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
-      // Create a query against the collection
-      const queryRef = await notesRef.where('userId', '==', userId).get();
+      console.log('/note userId ', userId);
 
-      res.send(queryRef);
+      const id = await pg.executeQuery({
+        // give the query a unique name
+        name: 'post-code-snippet',
+        text: `INSERT INTO snippets 
+          (title, content, snippet_type_id, owner_id, pinned, archived, created_at)
+          VALUES
+          ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+          `,
+        values: [title, content, SNIPPET_TYPES.note, userId, pinned, false, 'NOW()'],
+      });
+
+      console.log('/snippets created snippets', id);
+
+      res.send(id[0]);
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(error.message);
+    }
+  });
+
+  app.get('/note/:id', async (req, res) => {
+    try {
+      const { authorization: token } = req.headers;
+
+      const { id } = req.params;
+
+      const userId = await getUserId(admin, token);
+
+      // Create a query against the collection
+      const snippet = await pg.executeQuery({
+        // give the query a unique name
+        name: 'get-code-snippets',
+        text: `
+          SELECT
+            *
+          FROM snippets
+          WHERE
+          owner_id=$1
+          AND snippet_type_id=$2
+          AND id=$3;
+        `,
+        values: [
+          userId,
+          SNIPPET_TYPES.note,
+          id,
+        ],
+      });
+
+      res.send(snippet);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -29,46 +79,27 @@ export default (app, admin) => {
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const queryRef = await notesRef.where('userId', '==', userId).get();
+      const snippets = await pg.executeQuery({
+        // give the query a unique name
+        name: 'get-code-snippets',
+        text: `
+          SELECT
+            *
+          FROM snippets
+          WHERE
+          owner_id=$1
+          AND snippet_type_id=$2;
+        `,
+        values: [
+          userId,
+          SNIPPET_TYPES.note,
+        ],
+      });
 
-      const data = getDataFromSnapshot(queryRef);
-
-      res.send(data);
+      res.send(snippets);
     } catch (err) {
       console.log(`Error: /notes : ${err.message}`);
       res.status(500).send(err.message);
-    }
-  });
-
-  app.post('/note', async (req, res) => {
-    try {
-      console.log('Writing to notes');
-
-      const {
-        text, title, description, pinned,
-      } = req.body;
-
-      const { authorization: token } = req.headers;
-
-      const userId = await getUserId(admin, token);
-
-      console.log('/note userId ', userId);
-
-      const doc = await notesRef.add({
-        userId,
-        text,
-        title,
-        description,
-        pinned: pinned || false,
-      });
-
-      console.log('/notes created notes', doc.id);
-      console.log(doc);
-
-      res.send(doc.id);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error.message);
     }
   });
 
@@ -82,19 +113,30 @@ export default (app, admin) => {
 
       const { authorization: token } = req.headers;
 
-      const userId = await getUserId(admin, token);
+      const ownerId = await getUserId(admin, token);
 
-      console.log('/note userId ', userId);
-      console.log('id ', id);
+      console.log('/note userId ', ownerId);
 
-      const doc = await notesRef.doc(id).update({
-        pinned,
-      });
+      const { id: queriedId } = await pg.executeQuery({
+        // give the query a unique name
+        name: 'update-code-snippet',
+        text: `
+          UPDATE ${SNIPPET_TABLE_NAME}
+          SET
+            pinned=$1
+          WHERE
+          owner_id='${ownerId}'
+          AND id=${id}
+          AND snippet_type_id=${SNIPPET_TYPES.note}
+          RETURNING id;
+        `,
+        values: [pinned],
+      })[0];
 
-      console.log('/notes created notes', doc.id);
-      console.log(doc);
+      console.log('/notes created notes', queriedId);
+      console.log(queriedId);
 
-      res.send(doc.id);
+      res.send(queriedId);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -104,55 +146,65 @@ export default (app, admin) => {
   app.put('/note', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
-      const {
-        id, text, description, title,
-      } = req.body;
+      const { body } = req;
+      const { id } = body;
 
-      const userId = await getUserId(admin, token);
+      const ownerId = await getUserId(admin, token);
 
-      const isAuthed = await isAuthorizedFor(admin, token, userId);
+      const isAuthed = await isAuthorizedFor(admin, token, ownerId);
 
       if (!isAuthed) {
         res.status(401).send('Not Authorized for uuid');
         return;
       }
 
-      await notesRef.doc(id).set({
-        userId,
-        text,
-        title,
-        description,
-      });
+      const { values, sql } = getUpdateSnippetQuery(body);
 
-      res.send(id);
+      const { id: queriedId } = await pg.executeQuery({
+        // give the query a unique name
+        name: 'update-code-snippet',
+        text: `
+          UPDATE ${SNIPPET_TABLE_NAME}
+          SET
+            ${sql} 
+          WHERE
+          owner_id='${ownerId}'
+          AND id=${id}
+          AND snippet_type_id=${SNIPPET_TYPES.note}
+          RETURNING id;
+        `,
+        values,
+      })[0];
+
+      console.log('Updateing note: ', queriedId);
+
+      res.send(queriedId);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
     }
   });
 
-  app.delete('/note/:docId', async (req, res) => {
+  app.delete('/note/:id', async (req, res) => {
     try {
-      const { docId } = req.params;
+      const { id } = req.params;
 
-      console.log('Attempting to delete doc ', docId);
+      console.log('Attempting to delete doc ', id);
 
       const { authorization: token } = req.headers;
 
       const userId = await getUserId(admin, token);
 
-      const document = await notesRef.doc(docId).get();
+      const results = await pg.executeQuery({
+        // give the query a unique name
+        name: 'delete-note',
+        text: `
+          DELETE FROM ${SNIPPET_TABLE_NAME} WHERE id=$1 AND owner_id=$2 AND snippet_type_id=${SNIPPET_TYPES.note} returning id;
+        `,
+        values: [id, userId],
+      });
 
-      const { userId: documentUserId } = document.data();
-
-      if (documentUserId !== userId) {
-        res.status(401).sent('Not Authorized to delete');
-        return;
-      }
-
-      await db.collection('notes').doc(docId).delete();
-
-      res.send(docId);
+      res.send(results[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error);

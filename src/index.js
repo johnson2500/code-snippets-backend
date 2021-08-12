@@ -7,6 +7,7 @@ import snippetRoutes from './routes/snippets';
 import noteRoutes from './routes/notes';
 import todoRoutes from './routes/todos';
 import scratchPadRoutes from './routes/scratchPad';
+import PostgresHelper from './postgres/postgresHelper';
 
 const app = express();
 
@@ -16,19 +17,18 @@ app.use(bodyParser.json());
 
 const port = process.env.PORT || 4000;
 
+const pg = new PostgresHelper(process.env.POSTGRES_URI);
+
+pg.connect();
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.get('/test', (req, res) => {
-  console.log(req.headers.authorization);
-  res.send('Hello World!');
-});
-
-snippetRoutes(app, admin);
-noteRoutes(app, admin);
-todoRoutes(app, admin);
-scratchPadRoutes(app, admin);
+snippetRoutes(app, admin, pg);
+noteRoutes(app, admin, pg);
+todoRoutes(app, admin, pg);
+scratchPadRoutes(app, admin, pg);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
