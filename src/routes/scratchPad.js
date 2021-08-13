@@ -1,17 +1,9 @@
-import { v4 as uuidv4 } from 'uuid';
-import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
+import { SNIPPET_TABLE_NAME, SNIPPET_TYPES, getUpdateSnippetQuery } from '../helpers/snippetHelpers';
+import { isAuthorizedFor, getUserId } from '../helpers/index';
 
-export default (app, admin) => {
-  const db = admin.firestore();
-
-  const scratchPadRef = db.collection('scratchPads');
-
+export default (app, admin, pg) => {
   app.post('/scratch-pad', async (req, res) => {
     try {
-      console.log('Writing to scratch pads ');
-
-      console.log('Writing to scratch pads ');
-
       console.log('Writing to scratch pads ');
 
       const { language, content } = req.body;
@@ -22,22 +14,20 @@ export default (app, admin) => {
 
       console.log('/scratch-pads userId ', userId);
 
-      const uniqueId = uuidv4();
-
-      const doc = await scratchPadRef.add({
-        userId,
-        _id: uniqueId,
-        checked: false,
-        language,
-        content,
-        createdAt: new Date(),
-        updateAt: null,
-        archived: false,
+      const id = await pg.executeQuery({
+        // give the query a unique name
+        name: 'post-scratchpad',
+        text: `INSERT INTO ${SNIPPET_TABLE_NAME} 
+          (title, content, language, snippet_type_id, owner_id, archived, created_at)
+          VALUES
+          ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+          `,
+        values: [content, language, SNIPPET_TYPES.scratchPad, userId, false, 'NOW()'],
       });
 
-      console.log('/scratch-pads created todo', doc.id);
+      console.log('/scratch-pads created todo', id);
 
-      res.send(doc.id);
+      res.send(id);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -50,69 +40,65 @@ export default (app, admin) => {
 
       const userId = await getUserId(admin, token);
 
-      // Create a query against the collection
-      const queryRef = await scratchPadRef.where('userId', '==', userId).get();
+      const snippets = await pg.executeQuery({
+        // give the query a unique name
+        name: 'get-scratchpad',
+        text: `
+          SELECT
+            *
+          FROM ${SNIPPET_TABLE_NAME}
+          WHERE
+            owner_id=$1
+            and snippet_type_id=$2
+        `,
+        values: [userId, SNIPPET_TYPES.scratchPad],
+      });
 
-      const data = getDataFromSnapshot(queryRef);
+      console.log(snippets);
 
-      res.send(data);
+      res.send(snippets);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
     }
   });
 
-  app.delete('/scratch-pad/:docId', async (req, res) => {
-    try {
-      const { docId } = req.params;
-
-      console.log('Attempting to delete doc ', docId);
-
-      const { authorization: token } = req.headers;
-
-      const userId = await getUserId(admin, token);
-
-      const document = await scratchPadRef.doc(docId).get();
-
-      const { userId: documentUserId } = document.data();
-
-      if (documentUserId !== userId) {
-        res.status(401).sent('Not Authorized to delete');
-        return;
-      }
-
-      await db.collection('todo').doc(docId).delete();
-
-      res.send(docId);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error);
-    }
-  });
-
   app.put('/scratch-pad', async (req, res) => {
     try {
       const { authorization: token } = req.headers;
-      const {
-        id, language, content,
-      } = req.body;
+      const { body } = req;
+      const { id } = body;
 
-      const userId = await getUserId(admin, token);
+      const ownerId = await getUserId(admin, token);
 
-      const isAuthed = await isAuthorizedFor(admin, token, userId);
+      const isAuthed = await isAuthorizedFor(admin, token, ownerId);
 
       if (!isAuthed) {
         res.status(401).send('Not Authorized for uuid');
         return;
       }
 
-      await scratchPadRef.doc(id).set({
-        userId,
-        language,
-        content,
-      });
+      const { values, sql } = getUpdateSnippetQuery(body);
 
-      res.send(id);
+      const { id: queriedId } = await pg.executeQuery({
+        // give the query a unique name
+        name: 'update-scratchpad',
+        text: `
+          UPDATE ${SNIPPET_TABLE_NAME}
+          SET
+            ${sql} 
+          WHERE
+          owner_id='${ownerId}'
+          AND id=${id}
+          AND snippet_type_id=${SNIPPET_TYPES.scratchPad}
+          RETURNING id;
+        `,
+        values,
+      })[0];
+
+      console.log('Updateing snippet: ', queriedId);
+
+      res.send(queriedId);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);

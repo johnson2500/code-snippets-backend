@@ -23,7 +23,7 @@ CREATE TABLE snippets (
 
 CREATE TABLE to_do_list (
   id INT SERIAL PRIMARY KEY,
-  description VARCHAR,
+  content VARCHAR,
   owner_id VARCHAR,
   archived boolean,
   created_at timestamp,

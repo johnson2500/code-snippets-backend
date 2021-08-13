@@ -1,58 +1,35 @@
-import { v4 as uuidv4 } from 'uuid';
-import { isAuthorizedFor, getDataFromSnapshot, getUserId } from '../helpers/index';
+import { TODO_TABLE_NAME } from '../helpers/snippetHelpers';
+import { getUserId } from '../helpers/index';
 
-export default (app, admin) => {
-  const db = admin.firestore();
-
-  const todoRef = db.collection('todo');
-
+export default (app, admin, pg) => {
   app.post('/todo', async (req, res) => {
     try {
       console.log('Writing to todo');
 
-      const {
-        todo,
-      } = req.body;
+      const { content } = req.body;
+
+      console.log(req.body);
 
       const { authorization: token } = req.headers;
 
-      console.log(token);
+      const ownerId = await getUserId(admin, token);
 
-      const userId = await getUserId(admin, token);
+      console.log('/todos userId ', ownerId);
 
-      console.log('/todos userId ', userId);
-
-      const uniqueId = uuidv4();
-
-      const doc = await todoRef.add({
-        userId,
-        _id: uniqueId,
-        checked: false,
-        todo,
-        createdAt: new Date(),
-        updateAt: null,
-        archived: false,
+      const id = await pg.executeQuery({
+        // give the query a unique name
+        name: 'post-todo',
+        text: `INSERT INTO ${TODO_TABLE_NAME} 
+          (content,owner_id,archived,created_at)
+          VALUES
+          ($1, $2, $3, $4) RETURNING id
+          `,
+        values: [content, ownerId, false, 'NOW()'],
       });
 
-      console.log('/todos created todo', doc.id);
+      console.log('/todo created todos', id[0]);
 
-      res.send(doc.id);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error.message);
-    }
-  });
-
-  app.get('/todo', async (req, res) => {
-    try {
-      const { authorization: token } = req.headers;
-
-      const userId = await getUserId(admin, token);
-
-      // Create a query against the collection
-      const queryRef = await todoRef.where('userId', '==', userId).get();
-
-      res.send(queryRef);
+      res.send(id);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -68,73 +45,57 @@ export default (app, admin) => {
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const queryRef = await todoRef.where('userId', '==', userId).get();
+      const todos = await pg.executeQuery({
+        // give the query a unique name
+        name: 'get-todos',
+        text: `
+          SELECT
+            *
+          FROM ${TODO_TABLE_NAME}
+          WHERE
+            owner_id=$1;`,
+        values: [userId],
+      });
 
-      const data = getDataFromSnapshot(queryRef);
-
-      res.send(data);
+      res.send(todos);
     } catch (err) {
       console.log(`Error: /todos : ${err.message}`);
       res.status(500).send(err.message);
     }
   });
 
-  app.delete('/todo/:docId', async (req, res) => {
+  app.delete('/todo/:id', async (req, res) => {
     try {
-      const { docId } = req.params;
+      const { id } = req.params;
 
-      console.log('Attempting to delete doc ', docId);
+      console.log('Attempting to delete doc ', id);
 
       const { authorization: token } = req.headers;
 
-      const userId = await getUserId(admin, token);
+      const ownerId = await getUserId(admin, token);
 
-      const document = await todoRef.doc(docId).get();
+      const results = await pg.executeQuery({
+        // give the query a unique name
+        name: 'delete-todo',
+        text: `
+          DELETE FROM ${TODO_TABLE_NAME} 
+          WHERE
+            id=$1
+            AND owner_id=$2
+          RETURNING id;
+        `,
+        values: [id, ownerId],
+      });
 
-      const { userId: documentUserId } = document.data();
-
-      if (documentUserId !== userId) {
-        res.status(401).sent('Not Authorized to delete');
+      if (results && results.length > 0) {
+        res.send(results[0]);
         return;
       }
 
-      await db.collection('todo').doc(docId).delete();
-
-      res.send(docId);
+      res.status(401);
     } catch (error) {
       console.log(error);
       res.status(500).send(error);
-    }
-  });
-
-  app.put('/todo', async (req, res) => {
-    try {
-      const { authorization: token } = req.headers;
-      const {
-        id, language, code, description, title,
-      } = req.body;
-
-      const userId = await getUserId(admin, token);
-
-      const isAuthed = await isAuthorizedFor(admin, token, userId);
-
-      if (!isAuthed) {
-        res.status(401).send('Not Authorized for uuid');
-        return;
-      }
-
-      await todoRef.doc(id).set({
-        userId,
-        language,
-        code,
-        title,
-        description,
-      });
-
-      res.send(id);
-    } catch (error) {
-      console.log(error);
-      res.status(500).send(error.message);
     }
   });
 };

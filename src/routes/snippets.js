@@ -92,7 +92,7 @@ export default (app, admin, pg) => {
         // give the query a unique name
         name: 'post-code-snippet',
         text: `
-          DELETE FROM ${SNIPPET_TABLE_NAME} WHERE id=$1 AND owner_id=$2 AND snippet_type_id${SNIPPET_TYPES.snippet} returning id;
+          DELETE FROM ${SNIPPET_TABLE_NAME} WHERE id=$1 AND owner_id=$2 AND snippet_type_id=${SNIPPET_TYPES.snippet} returning id;
         `,
         values: [id, userId],
       });

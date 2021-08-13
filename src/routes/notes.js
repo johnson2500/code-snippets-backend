@@ -4,11 +4,9 @@ import { SNIPPET_TYPES, SNIPPET_TABLE_NAME, getUpdateSnippetQuery } from '../hel
 export default (app, admin, pg) => {
   app.post('/note', async (req, res) => {
     try {
-      console.log('Writing to notes');
+      console.log('creating new note');
 
-      const {
-        content, title, pinned,
-      } = req.body;
+      const { content, title, pinned } = req.body;
 
       const { authorization: token } = req.headers;
 
@@ -18,7 +16,7 @@ export default (app, admin, pg) => {
 
       const id = await pg.executeQuery({
         // give the query a unique name
-        name: 'post-code-snippet',
+        name: 'post-note',
         text: `INSERT INTO snippets 
           (title, content, snippet_type_id, owner_id, pinned, archived, created_at)
           VALUES
@@ -27,7 +25,7 @@ export default (app, admin, pg) => {
         values: [title, content, SNIPPET_TYPES.note, userId, pinned, false, 'NOW()'],
       });
 
-      console.log('/snippets created snippets', id);
+      console.log('/note created note', id);
 
       res.send(id[0]);
     } catch (error) {
@@ -45,9 +43,9 @@ export default (app, admin, pg) => {
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const snippet = await pg.executeQuery({
+      const note = await pg.executeQuery({
         // give the query a unique name
-        name: 'get-code-snippets',
+        name: 'get-code-note-by-id',
         text: `
           SELECT
             *
@@ -64,7 +62,7 @@ export default (app, admin, pg) => {
         ],
       });
 
-      res.send(snippet);
+      res.send(note);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -79,9 +77,9 @@ export default (app, admin, pg) => {
       const userId = await getUserId(admin, token);
 
       // Create a query against the collection
-      const snippets = await pg.executeQuery({
+      const notes = await pg.executeQuery({
         // give the query a unique name
-        name: 'get-code-snippets',
+        name: 'get-notes',
         text: `
           SELECT
             *
@@ -96,7 +94,7 @@ export default (app, admin, pg) => {
         ],
       });
 
-      res.send(snippets);
+      res.send(notes);
     } catch (err) {
       console.log(`Error: /notes : ${err.message}`);
       res.status(500).send(err.message);
@@ -189,7 +187,7 @@ export default (app, admin, pg) => {
     try {
       const { id } = req.params;
 
-      console.log('Attempting to delete doc ', id);
+      console.log('Attempting to delete note ', id);
 
       const { authorization: token } = req.headers;
 
@@ -199,7 +197,12 @@ export default (app, admin, pg) => {
         // give the query a unique name
         name: 'delete-note',
         text: `
-          DELETE FROM ${SNIPPET_TABLE_NAME} WHERE id=$1 AND owner_id=$2 AND snippet_type_id=${SNIPPET_TYPES.note} returning id;
+          DELETE FROM ${SNIPPET_TABLE_NAME} 
+          WHERE
+            id=$1
+            AND owner_id=$2
+            AND snippet_type_id=${SNIPPET_TYPES.note}
+          RETURNING id;
         `,
         values: [id, userId],
       });
