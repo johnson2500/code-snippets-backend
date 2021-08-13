@@ -20,14 +20,14 @@ export default (app, admin, pg) => {
         text: `INSERT INTO ${SNIPPET_TABLE_NAME} 
           (title, content, language, snippet_type_id, owner_id, archived, created_at)
           VALUES
-          ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+          ($1, $2, $3, $4, $5, $6, $7) RETURNING *
           `,
         values: [content, language, SNIPPET_TYPES.scratchPad, userId, false, 'NOW()'],
       });
 
-      console.log('/scratch-pads created todo', id);
+      console.log('/scratch-pads created todo', id[0]);
 
-      res.send(id);
+      res.send(id[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);

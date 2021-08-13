@@ -22,14 +22,14 @@ export default (app, admin, pg) => {
         text: `INSERT INTO ${TODO_TABLE_NAME} 
           (content,owner_id,archived,created_at)
           VALUES
-          ($1, $2, $3, $4) RETURNING id
+          ($1, $2, $3, $4) RETURNING *
           `,
         values: [content, ownerId, false, 'NOW()'],
       });
 
       console.log('/todo created todos', id[0]);
 
-      res.send(id);
+      res.send(id[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
