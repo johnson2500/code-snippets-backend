@@ -16,20 +16,20 @@ export default (app, admin, pg) => {
 
       console.log('/snippets userId ', userId);
 
-      const id = await pg.executeQuery({
+      const newSnippet = await pg.executeQuery({
         // give the query a unique name
         name: 'post-code-snippet',
         text: `INSERT INTO ${SNIPPET_TABLE_NAME} 
           (title, content, language, snippet_type_id, owner_id, archived, created_at)
           VALUES
-          ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+          ($1, $2, $3, $4, $5, $6, $7) RETURNING *
           `,
         values: [title, content, language, SNIPPET_TYPES.snippet, userId, false, 'NOW()'],
       });
 
-      console.log('/snippets created snippets', id[0]);
+      console.log('/snippets created snippets', newSnippet[0]);
 
-      res.send(id[0]);
+      res.send(newSnippet[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -46,12 +46,12 @@ export default (app, admin, pg) => {
 
       const snippets = await pg.executeQuery({
         // give the query a unique name
-        name: 'post-code-snippet',
+        name: 'get-code-snippet',
         text: `SELECT * FROM  ${SNIPPET_TABLE_NAME} WHERE id=$1 and owner_id=$2`,
         values: [id, userId],
       });
 
-      res.send(snippets);
+      res.send(snippets[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);
@@ -62,13 +62,13 @@ export default (app, admin, pg) => {
     try {
       const { authorization: token } = req.headers;
 
-      const userId = await getUserId(admin, token);
+      const ownerId = await getUserId(admin, token);
 
       const snippets = await pg.executeQuery({
         // give the query a unique name
         name: 'get-code-snippets',
         text: `SELECT * FROM snippets WHERE owner_id=$1 AND snippet_type_id=${SNIPPET_TYPES.snippet} ;`,
-        values: [userId],
+        values: [ownerId],
       });
 
       res.send(snippets);
@@ -90,7 +90,7 @@ export default (app, admin, pg) => {
 
       const results = await pg.executeQuery({
         // give the query a unique name
-        name: 'post-code-snippet',
+        name: 'delete-code-snippet',
         text: `
           DELETE FROM ${SNIPPET_TABLE_NAME} WHERE id=$1 AND owner_id=$2 AND snippet_type_id=${SNIPPET_TYPES.snippet} returning id;
         `,
@@ -98,7 +98,7 @@ export default (app, admin, pg) => {
       });
 
       if (results && results.length > 0) {
-        res.send(results);
+        res.send(results[0]);
         return;
       }
 
@@ -111,7 +111,11 @@ export default (app, admin, pg) => {
 
   app.put('/snippet', async (req, res) => {
     try {
+      console.log('/snippet put');
       const { authorization: token } = req.headers;
+
+      console.log(req.body);
+
       const { body } = req;
       const { id } = body;
 
@@ -126,7 +130,7 @@ export default (app, admin, pg) => {
 
       const { values, sql } = getUpdateSnippetQuery(body);
 
-      const { id: queriedId } = await pg.executeQuery({
+      const test = await pg.executeQuery({
         // give the query a unique name
         name: 'update-code-snippet',
         text: `
@@ -137,14 +141,14 @@ export default (app, admin, pg) => {
           owner_id='${ownerId}'
           AND id=${id}
           AND snippet_type_id=${SNIPPET_TYPES.snippet}
-          RETURNING id;
+          RETURNING *;
         `,
         values,
-      })[0];
+      });
 
-      console.log('Updateing snippet: ', queriedId);
+      console.log('Updateing snippet: ', test[0].id);
 
-      res.send(queriedId);
+      res.send(test[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);

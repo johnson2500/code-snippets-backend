@@ -6,7 +6,7 @@ export default (app, admin, pg) => {
     try {
       console.log('creating new note');
 
-      const { content, title, pinned } = req.body;
+      const { content, title, pinned = false } = req.body;
 
       const { authorization: token } = req.headers;
 
@@ -14,20 +14,20 @@ export default (app, admin, pg) => {
 
       console.log('/note userId ', userId);
 
-      const id = await pg.executeQuery({
+      const note = await pg.executeQuery({
         // give the query a unique name
         name: 'post-note',
         text: `INSERT INTO snippets 
           (title, content, snippet_type_id, owner_id, pinned, archived, created_at)
           VALUES
-          ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+          ($1, $2, $3, $4, $5, $6, $7) RETURNING *
           `,
         values: [title, content, SNIPPET_TYPES.note, userId, pinned, false, 'NOW()'],
       });
 
-      console.log('/note created note', id);
+      console.log('/note created note', note);
 
-      res.send(id[0]);
+      res.send(note[0]);
     } catch (error) {
       console.log(error);
       res.status(500).send(error.message);

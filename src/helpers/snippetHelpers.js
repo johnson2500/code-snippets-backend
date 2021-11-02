@@ -1,5 +1,6 @@
 export const SNIPPET_TABLE_NAME = 'snippets';
 export const TODO_TABLE_NAME = 'todo';
+export const USERS_TABLE_NAME = 'users';
 
 export const SNIPPET_TYPES = {
   snippet: 1,

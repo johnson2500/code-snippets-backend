@@ -22,7 +22,7 @@ CREATE TABLE snippets (
 );
 
 CREATE TABLE to_do_list (
-  id INT SERIAL PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   content VARCHAR,
   owner_id VARCHAR,
   archived boolean,
@@ -31,3 +31,12 @@ CREATE TABLE to_do_list (
   deleted_at timestamp
 );
 
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  user_name VARCHAR,
+  owner_id VARCHAR,
+  email VARCHAR,
+  created_at timestamp,
+  updated_at timestamp,
+  deleted_at timestamp
+);
