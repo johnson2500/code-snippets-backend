@@ -4,8 +4,7 @@ const Joi = require('joi');
 export default {
   postTaskSchema: Joi.object().keys({
     body: Joi.object().keys({
-      name: Joi.string().required(),
-      email: Joi.string().email().required(),
+      title: Joi.string().required(),
     }),
     params: Joi.object().keys({
     }),

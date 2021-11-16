@@ -45,7 +45,7 @@ export default class TaskGroup extends Model {
 
       properties: {
         id: { type: 'integer' },
-        name: { type: 'string' },
+        title: { type: 'string' },
         owner_id: { type: 'string' },
         archived: { type: 'boolean' },
         created_at: { type: 'string' },

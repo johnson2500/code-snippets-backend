@@ -32,7 +32,7 @@ export default class Tasks extends Model {
         task_group_id: { type: 'integer' },
         title: { type: 'string' },
         notes: { type: 'string' },
-        owner_id: { type: 'string' },
+        user_id: { type: 'string' },
         due_date: { type: 'string' },
         archived: { type: 'boolean' },
         created_at: { type: 'string' },
