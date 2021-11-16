@@ -1,5 +1,6 @@
-import { TODO_TABLE_NAME } from '../helpers/snippetHelpers';
-import { getUserId } from '../helpers/index';
+import { getUserId } from '../../helpers/index';
+
+const TODO_TABLE_NAME = 'todos';
 
 export default (app, admin, pg) => {
   app.post('/todo', async (req, res) => {

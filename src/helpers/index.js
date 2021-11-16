@@ -3,16 +3,11 @@
 
 export async function getUserId(admin, token) {
   // idToken comes from the client app
-  try {
-    const decodedToken = await admin
-      .auth()
-      .verifyIdToken(token);
+  const decodedToken = await admin
+    .auth()
+    .verifyIdToken(token);
 
-    return decodedToken.uid;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+  return decodedToken.uid;
 }
 
 export async function isAuthorizedFor(admin, token, uuid) {
