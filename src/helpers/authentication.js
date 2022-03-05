@@ -1,14 +1,13 @@
 import { getUserId } from './index';
 import admin from '../firebase';
 
-const expceptions = new Set([
+const exceptions = new Set([
   '/user-name/exists',
 ]);
 
 export default async (req, res, next) => {
   try {
-    console.log(expceptions.has(req.path));
-    if (expceptions.has(req.path)) {
+    if (exceptions.has(req.path)) {
       next();
       return;
     }

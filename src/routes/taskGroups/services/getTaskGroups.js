@@ -1,10 +1,10 @@
 import { appLogger } from '../../../helpers/logger';
-import Tasks from '../../../models/tasks';
+import TaskGroup from '../../../models/taskGroups';
 import Users from '../../../models/users';
 
 export default async (req, res) => {
   try {
-    const { ownerId } = req;
+    const { ownerId, params: { taskGroupId } } = req;
 
     appLogger(`Getting tasks for ${ownerId}`);
 
@@ -16,8 +16,11 @@ export default async (req, res) => {
       throw Error(`No user found for ${ownerId} when creating task.`);
     }
 
-    const tasks = await Tasks.query().where({
+    const tasks = await TaskGroup.query().where({
       user_id: userId,
+      id: taskGroupId,
+    }).withGraphFetched({
+      tasks: true,
     });
 
     appLogger({ message: `Getting tasks for ${ownerId}`, data: tasks });
