@@ -11,5 +11,9 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
+    'import/no-unresolved': [
+      2,
+      { caseSensitive: false },
+    ],
   },
 };

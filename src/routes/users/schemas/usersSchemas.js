@@ -8,6 +8,11 @@ export default {
       email: Joi.string().email().required(),
     }),
   }),
+  sessionLoginSchema: Joi.object().keys({
+    body: Joi.object().keys({
+      csrfToken: Joi.string(),
+    }),
+  }),
   postUserSchema: Joi.object().keys({
     body: Joi.object().keys({
       name: Joi.string().required(),
