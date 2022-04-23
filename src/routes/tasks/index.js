@@ -11,7 +11,7 @@ export default (app) => {
     postTask,
   );
   app.get(
-    '/task',
+    '/task/:taskId',
     validator(taskSchemas.getTaskSchema),
     getTask,
   );

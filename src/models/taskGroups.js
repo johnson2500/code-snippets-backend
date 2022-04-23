@@ -31,8 +31,8 @@ export default class TaskGroup extends Model {
         relation: Model.HasManyRelation,
         modelClass: Tasks,
         join: {
-          from: 'task_group.id',
-          to: 'tasks.task_group_id',
+          from: 'tasks.task_group.id',
+          to: 'tasks.tasks.task_group_id',
         },
       },
     };
@@ -41,12 +41,12 @@ export default class TaskGroup extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['name', 'ownerId'],
+      required: ['name', 'userId'],
 
       properties: {
         id: { type: 'integer' },
         title: { type: 'string' },
-        owner_id: { type: 'string' },
+        user_id: { type: 'integer' },
         archived: { type: 'boolean' },
         created_at: { type: 'string' },
         updated_at: { type: 'string' },

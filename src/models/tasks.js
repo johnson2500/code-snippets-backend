@@ -23,13 +23,27 @@ export default class Tasks extends Model {
     this.updated_at = new Date().toISOString();
   }
 
+  static get relationMappings() {
+    return {
+      tasks: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Tasks,
+        join: {
+          to: 'tasks.id',
+          from: 'tasks.task_group_id',
+        },
+      },
+    };
+  }
+
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['title', 'ownerId'],
+      required: ['title', 'userId', 'taskGroupId'],
       properties: {
         id: { type: 'integer' },
         task_group_id: { type: 'integer' },
+        taskGroupId: { type: 'integer' },
         title: { type: 'string' },
         notes: { type: 'string' },
         user_id: { type: 'string' },

@@ -5,6 +5,7 @@ import postUser from './services/postUser';
 import initializeUser from './services/initializeUser';
 import validator from '../../helpers/validator';
 import usersSchemas from './schemas/usersSchemas';
+import sessionLogin from './services/sessionLogin';
 
 export default (app) => {
   app.post(
@@ -12,6 +13,7 @@ export default (app) => {
     validator(usersSchemas.initializeUserSchema),
     initializeUser,
   );
+  app.post('/user/session-login', validator(usersSchemas.sessionLoginSchema), sessionLogin);
   app.post(
     '/user',
     validator(usersSchemas.postUserSchema),
