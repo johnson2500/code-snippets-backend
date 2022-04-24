@@ -1,3 +1,4 @@
+import './firebase/index';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -5,7 +6,6 @@ import * as logger from 'npmlog';
 import routes from './routes';
 import loggerMiddleWare from './helpers/logger';
 import authentication from './helpers/authentication';
-import './knex';
 
 const app = express();
 const cookieParser = require('cookie-parser');
