@@ -1,19 +1,17 @@
+// eslint-disable-next-line import/no-unresolved
 import checkUsername from './services/checkUsername';
-import getUsers from './services/getUsers';
 import getUser from './services/getUser';
 import postUser from './services/postUser';
-import initializeUser from './services/initializeUser';
 import validator from '../../helpers/validator';
 import usersSchemas from './schemas/usersSchemas';
-import sessionLogin from './services/sessionLogin';
+import signUpUser from './services/signUpUser';
 
 export default (app) => {
   app.post(
-    '/user/initialize',
-    validator(usersSchemas.initializeUserSchema),
-    initializeUser,
+    '/user/sign-up',
+    validator(usersSchemas.signUpUserSchema),
+    signUpUser,
   );
-  app.post('/user/session-login', validator(usersSchemas.sessionLoginSchema), sessionLogin);
   app.post(
     '/user',
     validator(usersSchemas.postUserSchema),
@@ -25,12 +23,7 @@ export default (app) => {
     getUser,
   );
   app.get(
-    '/users',
-    validator(usersSchemas.getUsersSchema),
-    getUsers,
-  );
-  app.get(
-    '/user-name/exists',
+    '/user-name/available',
     validator(usersSchemas.checkUsernameSchema),
     checkUsername,
   );

@@ -1,19 +1,17 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable no-console */
+// eslint-disable-next-line import/no-unresolved
+import { getAuth } from 'firebase-admin/auth';
 
-export async function getUserId(admin, token) {
-  // idToken comes from the client app
-  const decodedToken = await admin
-    .auth()
+export async function getUserId(token) {
+  const decodedToken = await getAuth()
     .verifyIdToken(token);
 
   return decodedToken.uid;
 }
 
-export async function isAuthorizedFor(admin, token, uuid) {
+export async function isAuthorizedFor(token, uuid) {
   // idToken comes from the client app
   try {
-    const uid = await getUserId(admin, token);
+    const uid = await getUserId(token);
     console.log(uuid, uid);
 
     if (!uid || uuid !== uid) {

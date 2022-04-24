@@ -1,12 +1,12 @@
-import Users from '../../../models/users';
+import { userCollectionRef } from '../../../models/users';
 
 export default async (req, res) => {
   try {
     const { body, ownerId } = req;
-    const id = await Users.query().insert({
+    const id = await userCollectionRef.doc(ownerId).set({
       ...body,
       ownerId,
-    });
+    }, { merge: true });
 
     res.send(id);
   } catch (error) {
