@@ -1,28 +1,31 @@
 import { appLogger } from '../../../helpers/logger';
-import Tasks from '../../../models/tasks';
-import Users from '../../../models/users';
+import Todos from '../../../models/todo';
+
+const todos = new Todos();
 
 export default async (req, res) => {
   try {
-    const { ownerId } = req;
+    const { ownerId, params: { todoListId } } = req;
 
     appLogger(`Getting tasks for ${ownerId}`);
 
-    const { id: userId } = await Users.query().findOne({
-      owner_id: ownerId,
+    const todoList = await todos.getTodoList(ownerId, todoListId);
+    const { title: todoListTitle } = todoList.data();
+
+    const todoItems = await todos.getTodoListItems(ownerId, todoListId);
+
+    const todoItemsResponse = [];
+    todoItems.forEach((val) => {
+      todoItemsResponse.push(val.data());
     });
 
-    if (!userId) {
-      throw Error(`No user found for ${ownerId} when creating task.`);
-    }
-
-    const tasks = await Tasks.query().where({
-      user_id: userId,
+    res.send({
+      todoList: {
+        id: todoList.id,
+        name: todoListTitle,
+        todoItems: todoItemsResponse,
+      },
     });
-
-    appLogger({ message: `Getting tasks for ${ownerId}`, data: tasks });
-
-    res.send(tasks);
   } catch (error) {
     appLogger(error);
     res.status(500).send(error.message);

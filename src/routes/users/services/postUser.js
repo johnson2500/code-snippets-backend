@@ -1,5 +1,5 @@
 /* eslint-disable import/no-unresolved */
-import { userCollectionRef } from '../../../models/users';
+import { userCollectionRef } from '../../../models/collectionRefs';
 import { appLogger } from '../../../helpers/logger';
 
 export default async (req, res) => {

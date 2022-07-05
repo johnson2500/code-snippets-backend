@@ -1,4 +1,4 @@
-import { userCollectionRef } from '../../../models/users';
+import { userCollectionRef } from '../../../models/collectionRefs';
 
 export default async (req, res) => {
   try {
