@@ -1,22 +1,44 @@
 /* eslint-disable import/no-unresolved */
-import { userCollectionRef } from '../../../models/collectionRefs';
+import { projectCollectionRef, userCollectionRef } from '../../../models/collectionRefs';
 import { appLogger } from '../../../helpers/logger';
 
 export default async (req, res) => {
   try {
     const { body, ownerId } = req;
-    const { userName } = body;
     appLogger({ message: 'Initializing User' });
 
     const userDocRef = userCollectionRef.doc(ownerId);
+    const projectRef = projectCollectionRef.doc(ownerId);
 
-    const userDoc = await userDocRef.set({
+    await userDocRef.set({
       ownerId,
-      userName,
       ...body,
     }, { merge: true });
 
-    res.send(userDoc);
+    await projectRef.set({
+      name: 'My Project',
+    });
+
+    await projectRef.collection('todoLists').add({
+      name: 'My First Todo',
+    });
+
+    const project = await projectRef.get();
+    const todoListsSnapshot = await projectRef.collection('todoLists').get();
+
+    const todoListsResponse = [];
+    todoListsSnapshot.forEach((doc) => {
+      todoListsResponse.push(doc.data());
+    });
+
+    const responseObj = {
+      project: {
+        name: project.name,
+        todoLists: todoListsResponse,
+      },
+    };
+
+    res.send(responseObj);
   } catch (error) {
     console.log(error);
 
