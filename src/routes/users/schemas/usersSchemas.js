@@ -4,8 +4,13 @@ const Joi = require('joi');
 export default {
   signUpUserSchema: Joi.object().keys({
     body: Joi.object().keys({
-      userName: Joi.string().required(),
-      email: Joi.string().email().required(),
+      email: Joi.string(),
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+      birthDay: Joi.date(),
+      gender: Joi.string(),
+      usage: Joi.string(),
+      career: Joi.string(),
     }),
   }),
   sessionLoginSchema: Joi.object().keys({

@@ -5,6 +5,7 @@ import BaseModel from './base';
 export default class Todos extends BaseModel {
   constructor() {
     super();
+    this.projectCollectionName = 'projects';
     this.baseCollectionName = 'todoLists';
     this.listsCollectionName = 'lists';
     this.itemsCollectionName = 'items';
