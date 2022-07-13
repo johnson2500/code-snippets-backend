@@ -1,40 +1,25 @@
-import postTodo from './services/postTodoList';
-import taskSchemas from './schemas/todoSchemas';
+import taskSchemas from './schemas/todoListItemSchemas';
 import validator from '../../helpers/validator';
-import getTodo from './services/getTodoList';
 import addTodoListItem from './services/postTodoItem';
 import getTodoListItem from './services/getTodoItem';
 import getTodos from './services/getTodos';
 
 export default (app) => {
-  // TODO LISTS
-  app.post(
-    '/todo-list',
-    validator(taskSchemas.postTodoSchema),
-    postTodo,
-  );
   app.get(
-    '/todo-list/:id',
-    validator(taskSchemas.getTodoSchema),
-    getTodo,
-  );
-
-  // TODO LIST ITEMS
-  app.get(
-    '/todo-list/:todoListId/item/:todoListItemId',
+    '/project/:projectId/todo-list/:todoListId/todo-list-item/:id',
     validator(taskSchemas.getTodoItemSchema),
     getTodoListItem,
   );
 
   app.post(
-    '/todo-list/:todoListId/item',
+    '/project/:projectId/todo-list/:todoListId/todo-list-item',
     validator(taskSchemas.postTodoListItemSchema),
     addTodoListItem,
   );
 
   // Get All Todos And List
   app.get(
-    '/todo-list/:todoListId/items',
+    'project/:projectId/todo-list/:todoListId/items',
     validator(taskSchemas.getTodosSchema),
     getTodos,
   );

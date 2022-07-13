@@ -3,6 +3,7 @@ import { getUserId } from './index';
 const exceptions = new Set([
   '/user-name/exists',
   'user/session-login',
+  '/test',
 ]);
 
 export default async (req, res, next) => {

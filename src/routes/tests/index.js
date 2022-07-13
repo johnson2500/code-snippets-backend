@@ -1,17 +1,22 @@
 // eslint-disable-next-line import/no-unresolved
 /* eslint-disable import/no-unresolved */
-import { todoListsCollectionRef } from '../../models/collectionRefs';
+import { getFirestore } from 'firebase-admin/firestore';
 
 export default (app) => {
   app.get(
     '/test',
     async (req, res) => {
-      const { ownerId } = req;
-      const snapshot = await todoListsCollectionRef.doc(ownerId).collection('lists').add({ name: 'First Todo' });
+      const userCollectionRef = getFirestore().collectionGroup('todoLists');
+      const data = await userCollectionRef.get();
 
-      console.log(snapshot.id);
+      const rest = [];
+      data.forEach((doc) => {
+        console.log(doc);
+        rest.push({ id: doc.id, data: doc.data(), child: doc.child });
+      });
+      console.log(data.id);
 
-      res.send(JSON.stringify(snapshot));
+      res.send(JSON.stringify(rest));
     },
   );
 };
