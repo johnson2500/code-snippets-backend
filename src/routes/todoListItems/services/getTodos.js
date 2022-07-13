@@ -1,5 +1,5 @@
 import { appLogger } from '../../../helpers/logger';
-import Todos from '../../../models/todo';
+import Todos from '../../../models/todoList';
 
 const todos = new Todos();
 

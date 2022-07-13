@@ -1,29 +1,35 @@
 /* eslint-disable import/no-unresolved */
-import { projectCollectionRef, userCollectionRef } from '../../../models/collectionRefs';
+import { userCollectionRef } from '../../../models/collectionRefs';
 import { appLogger } from '../../../helpers/logger';
+import Account from '../../../models/accounts';
+import Project from '../../../models/project';
 
 export default async (req, res) => {
   try {
     const { body, ownerId } = req;
+    const account = new Account(ownerId);
+    const project = new Project(ownerId);
+
     appLogger({ message: 'Initializing User' });
 
     const userDocRef = userCollectionRef.doc(ownerId);
-    const projectRef = projectCollectionRef.doc(ownerId);
+    const accountRef = account.getAccountRef(ownerId);
+    const projectRef = project.getUserProjectRef(ownerId);
 
     await userDocRef.set({
       ownerId,
       ...body,
     }, { merge: true });
 
-    await projectRef.set({
-      name: 'My Project',
+    await accountRef.set({
+      name: 'My Account',
     });
 
     await projectRef.collection('todoLists').add({
       name: 'My First Todo',
     });
 
-    const project = await projectRef.get();
+    const projectData = await projectRef.get();
     const todoListsSnapshot = await projectRef.collection('todoLists').get();
 
     const todoListsResponse = [];
@@ -33,7 +39,7 @@ export default async (req, res) => {
 
     const responseObj = {
       project: {
-        name: project.name,
+        name: projectData.name,
         todoLists: todoListsResponse,
       },
     };

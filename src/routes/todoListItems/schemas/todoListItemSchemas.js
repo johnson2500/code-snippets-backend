@@ -7,6 +7,7 @@ export default {
       title: Joi.string().required(),
     }),
     params: Joi.object().keys({
+      projectId: Joi.string().required(),
     }),
     query: Joi.object().keys({
     }),
@@ -14,6 +15,7 @@ export default {
   getTodoSchema: Joi.object().keys({
     body: Joi.object().keys({}),
     params: Joi.object().keys({
+      projectId: Joi.string().required(),
       id: Joi.string().required(),
     }),
     query: Joi.object().keys({}),
@@ -28,8 +30,9 @@ export default {
   getTodoItemSchema: Joi.object().keys({
     body: Joi.object().keys({}),
     params: Joi.object().keys({
-      todoListId: Joi.string(),
-      todoListItemId: Joi.string(),
+      projectId: Joi.string().required(),
+      todoListId: Joi.string().required(),
+      id: Joi.string().required(),
     }),
     query: Joi.object().keys({}),
   }),
@@ -42,6 +45,7 @@ export default {
     }),
     params: Joi.object().keys({
       todoListId: Joi.string(),
+      projectId: Joi.string(),
     }),
     query: Joi.object().keys({}),
   }),
