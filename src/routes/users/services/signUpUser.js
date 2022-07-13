@@ -1,53 +1,64 @@
 /* eslint-disable import/no-unresolved */
-import { userCollectionRef } from '../../../models/collectionRefs';
 import { appLogger } from '../../../helpers/logger';
-import Account from '../../../models/accounts';
 import Project from '../../../models/project';
+import TodoList from '../../../models/todoList';
+import TodoItem from '../../../models/todoItem';
+import reponseTransformer from '../../../helpers/reponseTransformer';
+
+const defaults = {
+  projectName: 'Default Project',
+  todoListName: 'My First Todo List',
+  todoListItemData: {
+    title: 'Ryans Best Try',
+    dueDate: 'Mon Jul 04 2022 14:30:26 GMT-0400 (Eastern Daylight Time)',
+    description: 'This is the first item',
+    tags: ['cool'],
+  },
+};
 
 export default async (req, res) => {
   try {
-    const { body, ownerId } = req;
-    const account = new Account(ownerId);
+    const { ownerId } = req;
     const project = new Project(ownerId);
 
     appLogger({ message: 'Initializing User' });
 
-    const userDocRef = userCollectionRef.doc(ownerId);
-    const accountRef = account.getAccountRef(ownerId);
-    const projectRef = project.getUserProjectRef(ownerId);
+    const projectData = await project.addProject({ name: defaults.projectName });
+    const projectId = projectData.id;
 
-    await userDocRef.set({
-      ownerId,
-      ...body,
-    }, { merge: true });
+    appLogger({ message: 'Initializing Todo List' });
 
-    await accountRef.set({
-      name: 'My Account',
-    });
+    const todoList = new TodoList(ownerId, projectId);
+    const todoListData = await todoList.addTodoList({ name: defaults.todoListName });
+    const todoListId = todoListData.id;
 
-    await projectRef.collection('todoLists').add({
-      name: 'My First Todo',
-    });
+    appLogger({ message: 'Initializing Todo List Item' });
 
-    const projectData = await projectRef.get();
-    const todoListsSnapshot = await projectRef.collection('todoLists').get();
-
-    const todoListsResponse = [];
-    todoListsSnapshot.forEach((doc) => {
-      todoListsResponse.push(doc.data());
-    });
+    const todoListItem = new TodoItem(ownerId, projectId, todoListId);
+    const todoListItemData = await todoListItem.addTodoListItem(defaults.todoListItemData);
+    const todoListItemId = todoListItemData.id;
 
     const responseObj = {
       project: {
-        name: projectData.name,
-        todoLists: todoListsResponse,
+        id: projectId,
+        name: defaults.projectName,
+        todoList: {
+          id: todoListId,
+          name: defaults.todoListName,
+          todoListItems: [
+            {
+              id: todoListItemId,
+              ...defaults.todoListItemData,
+            },
+          ],
+        },
       },
     };
 
-    res.send(responseObj);
+    res.send(reponseTransformer(req, responseObj));
   } catch (error) {
     console.log(error);
 
-    res.status(500).send(error.message);
+    res.status(500).send(reponseTransformer(req, { error: error.message }));
   }
 };
