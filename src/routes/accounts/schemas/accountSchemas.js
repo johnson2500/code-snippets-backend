@@ -21,4 +21,9 @@ export default {
     params: Joi.object().keys({}),
     query: Joi.object().keys({}),
   }),
+  getAccountAllSchema: Joi.object().keys({
+    body: Joi.object().keys({}),
+    params: Joi.object().keys({}),
+    query: Joi.object().keys({}),
+  }),
 };

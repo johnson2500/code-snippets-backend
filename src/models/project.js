@@ -25,4 +25,19 @@ export default class Project extends Account {
   async getProject() {
     return this.getProjectRef().doc(this.projectId).get();
   }
+
+  async getProjects() {
+    const projectsSnapshot = await this.getAccountRef()
+      .collection(this.projectCollectionName).get();
+    const projects = [];
+    projectsSnapshot.forEach((projectDoc) => {
+      const projectId = projectDoc.id;
+      projects.push({
+        id: projectId,
+        ...projectDoc.data(),
+      });
+    });
+
+    return projects;
+  }
 }

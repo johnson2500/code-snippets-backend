@@ -10,19 +10,19 @@ export default class Account extends BaseModel {
     this.accountRef = getFirestore().collection(this.accountCollectionName);
   }
 
-  getAccountRef(ownerId) {
-    return this.accountRef.doc(ownerId);
+  getAccountRef() {
+    return this.accountRef.doc(this.ownerId);
   }
 
-  async addAccount(ownerId, data) {
-    return this.accountRef.doc(ownerId).set(data);
+  async addAccount(data) {
+    return this.accountRef.doc(this.ownerId).set(data);
   }
 
-  async getAccount(ownerId) {
-    return this.getAccountRef(ownerId).get();
+  async getAccount() {
+    return this.getAccountRef(this.ownerId).get();
   }
 
-  async updateAccount(ownerId, data) {
-    return this.getAccountRef(ownerId).update(data);
+  async updateAccount(data) {
+    return this.getAccountRef(this.ownerId).update(data);
   }
 }

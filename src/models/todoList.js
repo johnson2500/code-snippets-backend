@@ -24,4 +24,19 @@ export default class TodoList extends Project {
   async getTodoList(id) {
     return this.getTodoListRef().doc(id).get();
   }
+
+  async getTodoLists() {
+    const todoListsSnapshot = await this.getTodoListRef().get();
+
+    const todoLists = [];
+    todoListsSnapshot.forEach((todoListObj) => {
+      todoLists.push({
+        id: todoListObj.id,
+        parentId: todoListObj.ref.parent.parent.id,
+        ...todoListObj.data(),
+      });
+    });
+
+    return todoLists;
+  }
 }

@@ -9,13 +9,10 @@ export default class TodoItem extends TodoList {
   }
 
   getFullTodoListItemRef() {
-    console.log('getting ref');
     return this.getFullTodoListRef().collection(this.todoListItemsCollectionName);
   }
 
   async addTodoListItem(data) {
-    console.log('getting ref');
-
     return this.getFullTodoListItemRef()
       .add(data);
   }
@@ -26,10 +23,21 @@ export default class TodoItem extends TodoList {
       .get();
   }
 
-  async getTodoListItems(ownerId, todoListCollectionId) {
-    return this.getTodoListsRef(ownerId)
-      .doc(todoListCollectionId)
-      .collection(this.itemsCollectionName)
+  async getTodoListItems() {
+    const todoListItemSnapshot = await this.getTodoListRef()
+      .doc(this.todoListId)
+      .collection(this.todoListItemsCollectionName)
       .get();
+
+    const todoListItems = [];
+    todoListItemSnapshot.forEach((todoListItemObj) => {
+      todoListItems.push({
+        id: todoListItemObj.id,
+        parentId: todoListItemObj.ref.parent.parent.id,
+        ...todoListItemObj.data(),
+      });
+    });
+
+    return todoListItems;
   }
 }
