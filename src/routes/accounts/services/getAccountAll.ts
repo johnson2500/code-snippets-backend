@@ -1,24 +1,24 @@
 import reponseTransformer from '../../../helpers/reponseTransformer';
-import Account from '../../../models/accountModel';
-import Project from '../../../models/projectModel';
-import TodoList from '../../../models/todoList';
-import TodoItem from '../../../models/todoItem';
+import Accounts from '../../../models/Accounts/accounts';
+import Projects from '../../../models/Projects/projects';
+import TodoLists from '../../../models/TodoLists/todoLists';
+import TodoItems from '../../../models/TodoListItems/todoListItems';
 import { Request, Response} from 'express'
 
 
 export default async (req: Request, res: Response): Promise<void> => {
   const { ownerId } = req;
 
-  const account = new Account(ownerId);
+  const account = new Accounts(ownerId);
   const accountData = await account.getAccount();
 
-  const project = new Project(ownerId);
+  const project = new Projects(ownerId);
 
   const projectsData = await project.getProjects();
   const todoListsPromises = [];
   projectsData.forEach((projectObj) => {
     const projectId = projectObj.id;
-    const todoList = new TodoList(ownerId, projectId);
+    const todoList = new TodoLists(ownerId, projectId);
     todoListsPromises.push(todoList.getTodoLists()); 
   });
 
@@ -38,7 +38,7 @@ export default async (req: Request, res: Response): Promise<void> => {
     const { todoLists = [], id: projectId } = projectObj;
     todoLists.forEach((todoListObj) => {
       const { id: todoListId } = todoListObj;
-      const todoListItem = new TodoItem(ownerId, projectId, todoListId);
+      const todoListItem = new TodoItems(ownerId, projectId, todoListId);
       todoListItemsPromiseArray.push(todoListItem.getTodoListItems());
     });
   });

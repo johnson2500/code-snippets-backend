@@ -1,4 +1,3 @@
-import checkUsername from './services/checkUsername';
 import getUser from './services/getUser';
 import postUser from './services/postUser';
 import validator from '../../helpers/validator';
@@ -21,15 +20,5 @@ export default (app: express.Application): void => {
     '/user/:id',
     validator(usersSchemas.getUserSchema),
     getUser,
-  );
-  app.get(
-    '/user-name/available',
-    validator(usersSchemas.checkUsernameSchema),
-    checkUsername,
-  );
-  app.put(
-    '/user',
-    validator(usersSchemas.putUserSchema),
-    checkUsername,
   );
 };

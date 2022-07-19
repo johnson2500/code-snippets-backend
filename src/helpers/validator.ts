@@ -1,5 +1,9 @@
-export default (schema) => (req, res, next) => {
-  const validationObj = {};
+import Joi from "joi";
+import { IValidationObj } from "@server/types";
+
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default (schema: Joi.AnySchema) => (req, res, next) => {
+  const validationObj: IValidationObj = {};
 
   if (Object.keys(req.body).length) {
     validationObj.body = req.body;

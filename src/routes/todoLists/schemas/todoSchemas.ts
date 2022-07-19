@@ -1,10 +1,11 @@
 // schemas.js
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const Joi = require('joi');
 
 export default {
   postTodoSchema: Joi.object().keys({
     body: Joi.object().keys({
-      title: Joi.string().required(),
+      name: Joi.string().required(),
     }),
     params: Joi.object().keys({
       projectId: Joi.string().required(),
@@ -30,9 +31,8 @@ export default {
   getTodoItemSchema: Joi.object().keys({
     body: Joi.object().keys({}),
     params: Joi.object().keys({
-      projectId: Joi.string().required(),
-      todoListId: Joi.string().required(),
-      id: Joi.string().required(),
+      todoListId: Joi.string(),
+      todoListItemId: Joi.string(),
     }),
     query: Joi.object().keys({}),
   }),
@@ -45,7 +45,6 @@ export default {
     }),
     params: Joi.object().keys({
       todoListId: Joi.string(),
-      projectId: Joi.string(),
     }),
     query: Joi.object().keys({}),
   }),

@@ -1,15 +1,8 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import Account from './accountModel';
-import { ITodoList } from './todoList';
+import { IProject } from './projectTypes'
+import Account from '../Accounts/accounts';
 
-export interface IProject {
-  id?: string
-  ownerId?: string;
-  name: string;
-  todoLists: ITodoList[];
-}
-
-export default class Project extends Account {
+export default class Projects extends Account {
   ownerId: string;
   projectId: string;
   projectCollectionName: string;

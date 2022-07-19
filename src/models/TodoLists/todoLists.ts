@@ -1,15 +1,7 @@
-import Project from './projectModel';
-import { ITodoListItem } from './todoItem';
+import Projects from '../Projects/projects';
+import { ITodoList } from './todoListTypes';
 
-export interface ITodoList {
-  id?: string;
-  ownerId: string;
-  name: string;
-  todoListItems?: ITodoListItem[];
-}
-
-
-export default class TodoList extends Project {
+export default class TodoLists extends Projects {
   ownerId: string;
   todoListId: string;
   listsCollectionName: string;

@@ -1,8 +1,8 @@
-import { appLogger } from '../../../helpers/logger';
-import Project from '../../../models/projectModel';
-import TodoList from '../../../models/todoList';
-import TodoItem from '../../../models/todoItem';
+import Project from '../../../models/Projects/projects';
+import TodoList from '../../../models/TodoLists/todoLists';
+import TodoItem from '../../../models/TodoListItems/todoListItems';
 import reponseTransformer from '../../../helpers/reponseTransformer';
+import { logger } from '@server/config/logger';
 import { Request, Response} from 'express';
 
 const defaults = {
@@ -21,18 +21,18 @@ export default async (req: Request, res: Response): Promise<void> => {
     const { ownerId } = req;
     const project = new Project(ownerId);
 
-    appLogger({ message: 'Initializing User' });
+    logger.info({ message: 'Initializing User' });
 
     const projectData = await project.addProject({ name: defaults.projectName });
     const projectId = projectData.id;
 
-    appLogger({ message: 'Initializing Todo List' });
+    logger.info({ message: 'Initializing Todo List' });
 
     const todoList: TodoList = new TodoList(ownerId, projectId);
     const todoListData = await todoList.addTodoList({ name: defaults.todoListName, ownerId });
     const todoListId = todoListData.id;
 
-    appLogger({ message: 'Initializing Todo List Item' });
+    logger.info({ message: 'Initializing Todo List Item' });
 
     const todoListItem = new TodoItem(ownerId, projectId, todoListId);
     const todoListItemData = await todoListItem.addTodoListItem({ ...defaults.todoListItemData, ownerId});

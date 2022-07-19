@@ -1,7 +1,6 @@
 import * as moduleAlias from 'module-alias';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import loggerMiddleWare from './helpers/logger';
 import authentication from './helpers/authentication';
 import { createServer } from '@config/express';
 import { AddressInfo } from 'net';
@@ -27,7 +26,6 @@ async function startServer() {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  app.use(loggerMiddleWare);
   app.use(authentication);
 
   routes(app)

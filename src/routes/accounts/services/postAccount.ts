@@ -1,4 +1,4 @@
-import Account from '../../../models/accountModel';
+import Account from '../../../models/Accounts/accounts';
 import reponseTransformer from '../../../helpers/reponseTransformer';
 import { Request, Response} from 'express'
 

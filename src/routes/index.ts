@@ -1,6 +1,5 @@
 import usersRoutes from './users';
 import testRoutes from './tests';
-import signUp from './signUp';
 import todoListRoutes from './todoLists';
 import todoListItemsRoutes from './todoListItems';
 import projectRoutes from './projects';
@@ -12,7 +11,6 @@ export default (app: express.Application): void => {
   todoListRoutes(app);
   todoListItemsRoutes(app);
   testRoutes(app);
-  signUp(app);
   projectRoutes(app);
   accountsRoutes(app);
 };
