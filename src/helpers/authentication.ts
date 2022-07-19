@@ -1,12 +1,21 @@
-import { getUserId } from './index';
-
+import { getAuth } from 'firebase-admin/auth';
+import { Response, Request } from 'express';
 const exceptions = new Set([
   '/user-name/exists',
   'user/session-login',
   '/test',
 ]);
 
-export default async (req, res, next) => {
+
+export async function getUserId(token: string): Promise<string> {
+  const decodedToken = await getAuth()
+    .verifyIdToken(token);
+
+  return decodedToken.uid;
+}
+
+
+export default async (req: Request, res: Response, next): Promise<void> => {
   try {
     if (exceptions.has(req.path)) {
       next();

@@ -1,14 +1,8 @@
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
-import BaseModel from './base';
-import { IProject } from './projectModel';
+import BaseModel from '../Base/base';
+import { IAccount } from './accountTypes';
 
-export interface IAccount {
-  id: string;
-  ownerId: string;
-  projects: IProject[];
-}
-
-export default class Account extends BaseModel {
+export default class Accounts extends BaseModel {
   ownerId: string;
   accountCollectionName: string;
   accountRef: FirebaseFirestore.CollectionReference;

@@ -4,7 +4,7 @@ import addTodoListItem from './services/postTodoItem';
 import getTodoListItem from './services/getTodoItem';
 import getTodos from './services/getTodos';
 
-export default (app) => {
+export default (app): void => {
   app.get(
     '/project/:projectId/todo-list/:todoListId/todo-list-item/:id',
     validator(taskSchemas.getTodoItemSchema),
@@ -19,7 +19,7 @@ export default (app) => {
 
   // Get All Todos And List
   app.get(
-    'project/:projectId/todo-list/:todoListId/items',
+    '/project/:projectId/todo-list/:todoListId/items',
     validator(taskSchemas.getTodosSchema),
     getTodos,
   );

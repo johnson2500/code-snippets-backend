@@ -1,24 +1,20 @@
-import { userCollectionRef } from '../../../models/collectionRefs';
-import { appLogger } from '../../../helpers/logger';
+import {logger} from '@config/logger'
 import { Request, Response} from 'express';
+import { Users } from '@server/models';
+import reponseTransformer from '@server/helpers/reponseTransformer';
 
 export default async (req: Request, res: Response): Promise<void> => {
   try {
     const { body, ownerId } = req;
-    const { userName } = body;
-    appLogger({ message: 'Initializing User' });
+    const user: Users = new Users(ownerId);
 
-    const userDocRef = userCollectionRef.doc(ownerId);
+    logger.info({ message: 'Initializing User' });
 
-    const userDoc = await userDocRef.set({
-      ownerId,
-      userName,
-      ...body,
-    }, { merge: true });
+    const userWriteResult: FirebaseFirestore.WriteResult = await user.addUser(body)
 
-    res.send(userDoc);
+    res.send(reponseTransformer(req, {...body, userWriteResult }));
   } catch (error: any) {
-    console.log(error);
+    logger.error(error);
 
     res.status(500).send(error.message);
   }

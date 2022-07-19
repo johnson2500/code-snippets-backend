@@ -1,15 +1,7 @@
-import TodoList from './todoList';
+import TodoLists from '../TodoLists/todoLists';
+import { ITodoListItem } from './todoListItemTypes'
 
-export interface ITodoListItem {
-  id?: string;
-  ownerId: string;
-  title: string;
-  description?: string;
-  tags?: string[];
-  duDate?: Date;
-}
-
-export default class TodoItem extends TodoList {
+export default class TodoItems extends TodoLists {
   ownerId: string;
   todoListItemId: string;
   todoListItemsCollectionName: string;
