@@ -1,5 +1,5 @@
-import Project from './project';
-import Account from './accounts';
+import Project from './projectModel';
+import Account from './accountModel';
 import TodoItem from './todoItem';
 import TodoList from './todoList';
 
