@@ -1,8 +1,8 @@
 import taskSchemas from './schemas/todoListItemSchemas';
 import validator from '../../helpers/validator';
-import addTodoListItem from './services/postTodoItem';
-import getTodoListItem from './services/getTodoItem';
-import getTodos from './services/getTodos';
+import addTodoListItem from './services/postTodoListItems';
+import getTodoListItem from './services/getTodoListItem';
+import getTodos from './services/getTodoListItems';
 
 export default (app): void => {
   app.get(
