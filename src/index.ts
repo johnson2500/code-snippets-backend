@@ -1,22 +1,21 @@
 import * as moduleAlias from 'module-alias';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import authentication from './helpers/authentication';
-import { createServer } from '@config/express';
-import { AddressInfo } from 'net';
-import http from 'http';
-import { logger } from '@config/logger';
-import './firebase/index';
-import routes from './routes';
-import './types/expressExtensions'
-
-const sourcePath = process.env.NODE_ENV === 'development' ? 'src' : 'build';
-
+const sourcePath = process.env.NODE_ENV === 'development' ? 'src' : __dirname;
 moduleAlias.addAliases({
   '@server': sourcePath,
   '@config': `${sourcePath}/config`,
   '@domain': `${sourcePath}/domain`,
 });
+
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import authentication from './helpers/authentication';
+import { createServer } from './config/express';
+import { AddressInfo } from 'net';
+import http from 'http';
+import './firebase/index';
+import routes from './routes';
+import './types/expressExtensions'
+import { logger } from './config/logger';
 
 const host = process.env.HOST || '0.0.0.0';
 const port = process.env.PORT || '9000';

@@ -6,14 +6,17 @@
         "node": ">=14 <15"
     },
     "scripts": {
-        "start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
+        "start": "npm run build && npm run prod:install && node ./build/index.js",
+        "prod:install": "cp package.json build/package.json && cd build && npm install --production",
+        "dev:start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
         "dev": "nodemon --config restart.json",
         "clean": "rm -rf coverage build tmp",
         "prebuild": "npm run lint",
         "build": "tsc -p tsconfig.build.json",
         "build:watch": "tsc -w -p tsconfig.build.json",
         "lint": "eslint . --ext .ts,.tsx",
-        "test": "jest"
+        "test": "jest",
+        "trace": "tsc --traceResolution"
     },
     "author": "Dantis Mai <mtd.maithanhdanh@gmail.com>",
     "license": "Apache-2.0",

@@ -1,5 +1,5 @@
-import reponseTransformer from '@server/helpers/reponseTransformer';
 import { Users } from '@server/models';
+import reponseTransformer from '@server/helpers/reponseTransformer';
 import { Request, Response} from 'express';
 
 export default async (req: Request, res: Response): Promise<void> => {
