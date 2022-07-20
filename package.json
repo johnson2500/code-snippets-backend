@@ -11,7 +11,7 @@
         "dev:start": "ts-node -r tsconfig-paths/register -r dotenv/config src/index",
         "dev": "nodemon --config restart.json",
         "clean": "rm -rf coverage build tmp",
-        "prebuild": "echo cool",
+        "prebuild": "npm install --save tsc typescript",
         "build": "tsc -p tsconfig.build.json",
         "build:watch": "tsc -w -p tsconfig.build.json",
         "lint": "eslint . --ext .ts,.tsx",
@@ -27,6 +27,7 @@
         "joi": "^17.6.0",
         "module-alias": "^2.2.2",
         "tslib": "~2.3.0",
+        "typescript": "~4.3.5",
         "winston": "^3.3.3"
     },
     "devDependencies": {
