@@ -29,6 +29,12 @@ async function startServer() {
 
   routes(app)
 
+  app.get(
+    '/health', (_, res) => {
+      res.send('Hello World')
+    }
+  )
+
   const server = http.createServer(app).listen({ host, port }, () => {
     const addressInfo = server.address() as AddressInfo;
     logger.info(
