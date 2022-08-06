@@ -7,9 +7,9 @@ export default async (req: Request, res: Response): Promise<void> => {
     const { ownerId, params: { id, projectId } } = req;
     logger.info(`Getting todo list ${id} for ${ownerId}`);
     const todos = new Todos(ownerId, projectId);
-    const data = await todos.getTodoList(id);
+    const data = await todos.getTodoLists();
 
-    res.send(data.data());
+    res.send(data);
   } catch (error: any) {
     logger.info(error);
     res.status(500).send(error.message);

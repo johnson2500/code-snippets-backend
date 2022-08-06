@@ -28,7 +28,7 @@ export default class TodoItems extends TodoLists {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  async getTodoListItems() {
+  async getTodoListItems(): Promise<ITodoListItem[]> {
     const todoListItemSnapshot = await this.getTodoListRef()
       .doc(this.todoListId)
       .collection(this.todoListItemsCollectionName)
@@ -38,7 +38,8 @@ export default class TodoItems extends TodoLists {
     todoListItemSnapshot.forEach((todoListItemObj) => {
       todoListItems.push({
         id: todoListItemObj.id,
-        parentId: todoListItemObj.ref.parent.parent.id,
+        ownerId: this.ownerId,
+        todoListId: todoListItemObj.ref.parent.parent.id,
         ...todoListItemObj.data(),
       });
     });

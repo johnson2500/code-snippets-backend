@@ -30,7 +30,7 @@ export default async (req: Request, res: Response): Promise<void> => {
         todoItems: todoItemsResponse,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.info(error);
     res.status(500).send(error.message);
   }

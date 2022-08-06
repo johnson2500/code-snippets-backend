@@ -24,27 +24,7 @@ export default {
   getTodosSchema: Joi.object().keys({
     body: Joi.object().keys({}),
     params: Joi.object().keys({
-      todoListId: Joi.string(),
-    }),
-    query: Joi.object().keys({}),
-  }),
-  getTodoItemSchema: Joi.object().keys({
-    body: Joi.object().keys({}),
-    params: Joi.object().keys({
-      todoListId: Joi.string(),
-      todoListItemId: Joi.string(),
-    }),
-    query: Joi.object().keys({}),
-  }),
-  postTodoListItemSchema: Joi.object().keys({
-    body: Joi.object().keys({
-      title: Joi.string(),
-      dueDate: Joi.date(),
-      description: Joi.string(),
-      tags: Joi.array().items(Joi.string()),
-    }),
-    params: Joi.object().keys({
-      todoListId: Joi.string(),
+      projectId: Joi.string(),
     }),
     query: Joi.object().keys({}),
   }),

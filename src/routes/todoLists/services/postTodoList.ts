@@ -11,7 +11,7 @@ export default async (req: Request, res: Response): Promise<void> => {
     const data = await todos.addTodoList({ name, ownerId });
 
     res.send(reponseTransformer(req, { id: data.id }));
-  } catch (error) {
+  } catch (error: any) {
     logger.info(error);
     res.status(500).send(reponseTransformer(req, { error: error.message }));
   }

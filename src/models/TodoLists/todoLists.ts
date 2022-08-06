@@ -35,7 +35,7 @@ export default class TodoLists extends Projects {
     todoListsSnapshot.forEach((todoListObj: FirebaseFirestore.DocumentData) => {
       const currentTodoList: ITodoList = {
         id: todoListObj.id,
-        parentId: todoListObj.ref.parent.parent.id,
+        projectId: todoListObj.ref.parent.parent.id,
         ...todoListObj.data()
       }
 
@@ -43,5 +43,12 @@ export default class TodoLists extends Projects {
     });
 
     return todoLists;
+  }
+
+  async getTodoListsAndItems(): Promise<any> {
+
+    const lists: ITodoList[] = await this.getTodoLists()
+
+    return lists
   }
 }
