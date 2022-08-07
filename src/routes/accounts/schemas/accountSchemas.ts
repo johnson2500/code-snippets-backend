@@ -7,19 +7,10 @@ export default {
     body: Joi.object().keys({
       name: Joi.string().required(),
     }).required(),
-    params: Joi.object().keys({}),
-    query: Joi.object().keys({}),
   }),
   getAccountSchema: Joi.object().keys({
-    body: Joi.object().keys({}),
     params: Joi.object().keys({
       accountId: Joi.string(),
     }),
-    query: Joi.object().keys({}),
-  }),
-  getAccountAllSchema: Joi.object().keys({
-    body: Joi.object().keys({}),
-    params: Joi.object().keys({}),
-    query: Joi.object().keys({}),
   }),
 };

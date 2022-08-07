@@ -43,6 +43,7 @@ async function startServer() {
   });
 
   const signalTraps: NodeJS.Signals[] = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
+  
   signalTraps.forEach((type) => {
     process.once(type, async () => {
       logger.info(`process.once ${type}`);

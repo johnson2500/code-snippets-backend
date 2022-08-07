@@ -1,5 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { IProject } from './projectTypes'
+import { IProject } from '../../types/projectTypes'
 import Account from '../Accounts/accounts';
 
 export default class Projects extends Account {

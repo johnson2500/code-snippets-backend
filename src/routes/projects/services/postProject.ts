@@ -1,4 +1,4 @@
-import Projects from '../../../models/Projects/projects';
+import Projects from '../../../models/Projects/projectRef';
 import express, { Request} from 'express'
 
 export default async (req: Request, res: express.Response): Promise<void> => {

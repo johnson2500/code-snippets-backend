@@ -3,11 +3,18 @@ import reponseTransformer from '../../../helpers/reponseTransformer';
 import { Request, Response} from 'express'
 
 export default async (req: Request, res: Response): Promise<void> => {
-  const { ownerId, body } = req;
+  try {
 
-  const account: Account = new Account(ownerId);
+    const { ownerId, body } = req;
 
-  await account.addAccount(body);
+    const account: Account = new Account(ownerId);
+  
+    await account.addAccount(body);
+  
+    res.send(reponseTransformer(req, { ...body, id: ownerId }));
+  } catch (error: any) {
+    console.log(error);
 
-  res.send(reponseTransformer(req, { ...body, id: ownerId }));
+    res.status(500).send(reponseTransformer(req, { error: error.message }));
+  }
 };

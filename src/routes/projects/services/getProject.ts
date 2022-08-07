@@ -1,4 +1,4 @@
-import Project from '../../../models/Projects/projects';
+import Project from '../../../models/Projects/projectRef';
 import reponseTransformer from '../../../helpers/reponseTransformer';
 
 import express, { Request } from 'express'

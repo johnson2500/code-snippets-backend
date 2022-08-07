@@ -1,6 +1,6 @@
 import { DocumentData, getFirestore } from 'firebase-admin/firestore';
 import BaseModel from '../Base/base';
-import { IAccount } from './accountTypes';
+import { IAccount } from '../../types/accountTypes';
 
 export default class Accounts extends BaseModel {
   ownerId: string;
