@@ -3,11 +3,11 @@ import TaskItems from '@server/models/TaskItems/taskItems';
 
 export default async (req: Request, res: express.Response): Promise<void> => {
   const { ownerId, body } = req;
-  const { projectId } = body;
+  const { projectId, taskId, completed} = body;
 
-  const taskItems: TaskItems = new TaskItems(projectId, ownerId);
+  const taskItems: TaskItems = new TaskItems(ownerId, projectId);
 
-  const {id} = await taskItems.addTaskItem({ title: body.title });
+  const tasks = await taskItems.updateComplete(taskId, completed)
 
-  res.send({ id });
+  res.send({ tasks });
 };
